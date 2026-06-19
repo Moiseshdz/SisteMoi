@@ -1,0 +1,75 @@
+{
+  "metadata": {
+    "nombre": "CHECKLIST_CAMARAS_DB",
+    "tipo": "BASE_DATOS_TXT",
+    "version": "1.0",
+    "fechaExportacion": "19/6/2026, 12:14:16 a.m.",
+    "descripcion": "Base de datos local del checklist de cámaras"
+  },
+  "inventario": {
+    "ptz": 50,
+    "fijas": 74,
+    "analiticas": 10,
+    "lpr": 3,
+    "panico": 2
+  },
+  "catalogo": [
+    {
+      "id": "cam_711",
+      "clave": "711",
+      "localidad": "MORELOS II"
+    },
+    {
+      "id": "cam_717",
+      "clave": "717",
+      "localidad": "CRUCERO A ZARAGOZA"
+    },
+    {
+      "id": "cam_718",
+      "clave": "718",
+      "localidad": "BOMBERO"
+    },
+    {
+      "id": "cam_719",
+      "clave": "719",
+      "localidad": "NEGALUMA"
+    },
+    {
+      "id": "cam_724",
+      "clave": "724",
+      "localidad": "ZAPOTAL"
+    },
+    {
+      "id": "cam_729",
+      "clave": "729",
+      "localidad": "PLAZA CIVICA"
+    },
+    {
+      "id": "cam_739",
+      "clave": "739",
+      "localidad": "Z6 Y PETROLERA"
+    },
+    {
+      "id": "cam_741",
+      "clave": "741",
+      "localidad": "POZO BONANZA"
+    },
+    {
+      "id": "cam_742",
+      "clave": "742",
+      "localidad": "ZONA 6-ESPERANZA"
+    },
+    {
+      "id": "cam_750",
+      "clave": "750",
+      "localidad": "MERCADO ZONA 5B"
+    },
+    {
+      "id": "cam_760",
+      "clave": "760",
+      "localidad": "LOMAS DEL SANTUARIO"
+    }
+  ],
+  "camarasFuera": [],
+  "otrosFuera": []
+}

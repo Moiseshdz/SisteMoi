@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Redactor Inteligente IA - API GET</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: rgba(15, 25, 43, .88);
+      --panel-2: rgba(20, 34, 58, .96);
+      --text: #eef6ff;
+      --muted: #9fb0c8;
+      --line: rgba(255,255,255,.12);
+      --accent: #35d3ff;
+      --accent-2: #7c5cff;
+      --good: #42e68f;
+      --warn: #ffd166;
+      --danger: #ff5d73;
+      --shadow: 0 22px 80px rgba(0,0,0,.45);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(53,211,255,.20), transparent 35%),
+        radial-gradient(circle at bottom right, rgba(124,92,255,.22), transparent 38%),
+        linear-gradient(135deg, #050914, var(--bg));
+      overflow-x: hidden;
+    }
+
+    .app {
+      width: min(1180px, 94vw);
+      margin: 28px auto;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .logo {
+      width: 58px;
+      height: 58px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 14px 40px rgba(53,211,255,.22);
+      font-size: 28px;
+      font-weight: 900;
+      color: white;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(24px, 4vw, 42px);
+      line-height: 1.05;
+      letter-spacing: -.8px;
+    }
+
+    .subtitle {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .pill {
+      border: 1px solid rgba(53,211,255,.25);
+      color: #dff8ff;
+      background: rgba(53,211,255,.10);
+      border-radius: 999px;
+      padding: 10px 13px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      overflow: hidden;
+    }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 18px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .card-title {
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+
+    .card-body { padding: 18px; }
+
+    label {
+      display: block;
+      color: #d8e8ff;
+      font-weight: 700;
+      font-size: 13px;
+      margin: 0 0 7px;
+    }
+
+    textarea, input, select {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.13);
+      background: rgba(4, 10, 20, .55);
+      color: var(--text);
+      outline: none;
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 15px;
+      transition: border .2s, box-shadow .2s, background .2s;
+    }
+
+    textarea {
+      min-height: 280px;
+      resize: vertical;
+      line-height: 1.55;
+    }
+
+    textarea:focus, input:focus, select:focus {
+      border-color: rgba(53,211,255,.62);
+      box-shadow: 0 0 0 4px rgba(53,211,255,.10);
+      background: rgba(4, 10, 20, .76);
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .two {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    button {
+      border: 0;
+      color: white;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.12);
+      padding: 12px 14px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 800;
+      letter-spacing: .1px;
+      transition: transform .15s, opacity .15s, background .15s;
+    }
+
+    button:hover { transform: translateY(-1px); background: rgba(255,255,255,.16); }
+    button:active { transform: translateY(1px); }
+    button:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+    .primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      border-color: transparent;
+      box-shadow: 0 12px 26px rgba(53,211,255,.18);
+    }
+
+    .success { background: rgba(66,230,143,.18); border-color: rgba(66,230,143,.35); }
+    .warning { background: rgba(255,209,102,.16); border-color: rgba(255,209,102,.35); }
+    .danger { background: rgba(255,93,115,.16); border-color: rgba(255,93,115,.35); }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      min-height: 24px;
+      margin-top: 10px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--muted);
+      box-shadow: 0 0 18px currentColor;
+    }
+
+    .dot.good { background: var(--good); }
+    .dot.warn { background: var(--warn); }
+    .dot.bad { background: var(--danger); }
+
+    .mini {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      margin-top: 8px;
+    }
+
+    .api-box {
+      margin-top: 18px;
+      padding: 15px;
+      background: rgba(255,255,255,.06);
+      border: 1px dashed rgba(255,255,255,.18);
+      border-radius: 18px;
+    }
+
+    .api-box summary {
+      cursor: pointer;
+      font-weight: 800;
+      color: #eaf8ff;
+    }
+
+    .history {
+      display: grid;
+      gap: 10px;
+      max-height: 290px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .item {
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.055);
+      border-radius: 16px;
+      padding: 12px;
+      cursor: pointer;
+    }
+
+    .item:hover { background: rgba(255,255,255,.09); }
+    .item small { color: var(--muted); display: block; margin-bottom: 6px; }
+    .item div { color: #edf7ff; font-size: 13px; line-height: 1.38; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .stat {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 15px;
+      padding: 12px;
+    }
+
+    .stat b { font-size: 20px; display: block; }
+    .stat span { color: var(--muted); font-size: 12px; }
+
+    .footer {
+      text-align: center;
+      color: rgba(255,255,255,.55);
+      font-size: 12px;
+      margin: 18px 0 4px;
+    }
+
+    @media (max-width: 920px) {
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .grid, .controls, .two { grid-template-columns: 1fr; }
+      textarea { min-height: 220px; }
+      .pill { white-space: normal; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="topbar">
+      <div class="brand">
+        <div class="logo">IA</div>
+        <div>
+          <h1>Redactor Inteligente</h1>
+          <p class="subtitle">Redacta, corrige, formaliza y parafrasea tus textos con IA por API GET.</p>
+        </div>
+      </div>
+      <div class="pill" id="apiBadge">API: Pollinations GET</div>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Texto original</div>
+          <button onclick="pegarTexto()">Pegar</button>
+        </div>
+        <div class="card-body">
+          <div class="controls">
+            <div>
+              <label for="modo">Modo</label>
+              <select id="modo">
+                <option value="profesional">Profesional</option>
+                <option value="formal">Formal</option>
+                <option value="parafrasear">Parafrasear</option>
+                <option value="ortografia">Corregir ortografía</option>
+                <option value="claro">Más claro y entendible</option>
+                <option value="resumir">Resumir</option>
+                <option value="ampliar">Ampliar</option>
+                <option value="oficio">Oficio formal</option>
+                <option value="tarjeta911">Tarjeta informativa 9-1-1</option>
+                <option value="reporte">Reporte operativo</option>
+              </select>
+            </div>
+            <div>
+              <label for="tono">Tono</label>
+              <select id="tono">
+                <option value="institucional">Institucional</option>
+                <option value="respetuoso">Respetuoso</option>
+                <option value="directo">Directo</option>
+                <option value="ejecutivo">Ejecutivo</option>
+                <option value="operativo">Operativo</option>
+                <option value="juridico">Jurídico simple</option>
+              </select>
+            </div>
+            <div>
+              <label for="modelo">Modelo</label>
+              <select id="modelo">
+                <option value="openai">openai</option>
+                <option value="mistral">mistral</option>
+              </select>
+            </div>
+          </div>
+
+          <label for="entrada">Escribe aquí lo que quieras mejorar</label>
+          <textarea id="entrada" placeholder="Ejemplo: se recibe reporte de una persona lesionada en la colonia centro, al llegar pc se valora y se traslada al hospital..."></textarea>
+
+          <div class="buttons">
+            <button class="primary" id="btnIA" onclick="redactarIA()">Redactar con IA</button>
+            <button class="warning" onclick="redactarLocal()">Redacción local</button>
+            <button onclick="limpiarEntrada()">Limpiar</button>
+          </div>
+
+          <div class="status" id="status">
+            <span class="dot" id="statusDot"></span>
+            <span id="statusText">Listo para redactar.</span>
+          </div>
+
+          <details class="api-box">
+            <summary>Configuración avanzada de API GET</summary>
+            <div style="margin-top:14px">
+              <label for="apiUrl">Endpoint GET</label>
+              <input id="apiUrl" value="https://text.pollinations.ai/{prompt}?model={model}&temperature={temperature}&system={system}" />
+              <p class="mini">
+                Puedes cambiarlo por otra API. Usa las variables: {prompt}, {model}, {temperature}, {system}. El sistema reemplaza todo automáticamente.
+              </p>
+            </div>
+            <div class="two">
+              <div>
+                <label for="temperature">Creatividad</label>
+                <select id="temperature">
+                  <option value="0.3">Preciso</option>
+                  <option value="0.6" selected>Balanceado</option>
+                  <option value="0.9">Creativo</option>
+                </select>
+              </div>
+              <div>
+                <label for="maxChars">Límite recomendado</label>
+                <input id="maxChars" type="number" value="3500" min="500" max="9000" />
+              </div>
+            </div>
+            <div class="buttons">
+              <button onclick="guardarConfig()">Guardar configuración</button>
+              <button onclick="restaurarConfig()">Restaurar API</button>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Resultado profesional</div>
+          <button class="success" onclick="copiarResultado()">Copiar</button>
+        </div>
+        <div class="card-body">
+          <label for="salida">Texto redactado</label>
+          <textarea id="salida" placeholder="Aquí aparecerá tu texto mejor redactado..."></textarea>
+
+          <div class="buttons">
+            <button class="success" onclick="descargarTXT()">Descargar TXT</button>
+            <button onclick="usarComoEntrada()">Usar como entrada</button>
+            <button onclick="leerResultado()">Leer en voz alta</button>
+            <button class="danger" onclick="limpiarTodo()">Borrar todo</button>
+          </div>
+
+          <div class="stats">
+            <div class="stat"><b id="chars">0</b><span>Caracteres</span></div>
+            <div class="stat"><b id="words">0</b><span>Palabras</span></div>
+            <div class="stat"><b id="saved">0</b><span>Guardados</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:18px">
+      <div class="card-head">
+        <div class="card-title">Historial reciente</div>
+        <button onclick="borrarHistorial()">Borrar historial</button>
+      </div>
+      <div class="card-body">
+        <div id="history" class="history"></div>
+      </div>
+    </section>
+
+    <div class="footer">Redactor Inteligente IA · Funciona en un solo index.html · API GET configurable</div>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const DEFAULT_API = 'https://text.pollinations.ai/{prompt}?model={model}&temperature={temperature}&system={system}';
+
+    const INSTRUCCIONES = {
+      profesional: 'Redacta el texto de manera profesional, clara, ordenada y formal. Corrige errores, mejora la estructura y conserva el sentido original.',
+      formal: 'Convierte el texto en una redacción formal, respetuosa e institucional. Mantén un estilo serio y bien estructurado.',
+      parafrasear: 'Parafrasea el texto con palabras diferentes, mejorando la claridad, sin cambiar el significado.',
+      ortografia: 'Corrige ortografía, puntuación, acentos, gramática y redacción. No inventes datos.',
+      claro: 'Haz que el texto sea más claro, entendible, directo y bien redactado. Conserva la información original.',
+      resumir: 'Resume el texto de forma clara y profesional, conservando los puntos importantes.',
+      ampliar: 'Amplía el texto de forma profesional, agregando conectores y mejor estructura, sin inventar hechos no mencionados.',
+      oficio: 'Convierte el texto en un oficio formal con lenguaje institucional. Incluye asunto, cuerpo respetuoso y cierre formal.',
+      tarjeta911: 'Convierte el texto en una tarjeta informativa estilo 9-1-1. Usa redacción objetiva, cronológica y operativa. No inventes folios, nombres ni datos no proporcionados.',
+      reporte: 'Convierte el texto en un reporte operativo profesional, claro y ordenado. Incluye hechos, acciones realizadas y cierre si la información lo permite.'
+    };
+
+    function setStatus(text, type = '') {
+      $('statusText').textContent = text;
+      $('statusDot').className = 'dot ' + type;
+    }
+
+    function construirPrompt(texto) {
+      const modo = $('modo').value;
+      const tono = $('tono').value;
+      return `Actúa como redactor profesional en español de México.\n\n` +
+        `Tarea: ${INSTRUCCIONES[modo]}\n` +
+        `Tono solicitado: ${tono}.\n\n` +
+        `Reglas obligatorias:\n` +
+        `- Corrige ortografía, puntuación y gramática.\n` +
+        `- Redacta de forma profesional, clara y ordenada.\n` +
+        `- No inventes información que no aparezca en el texto.\n` +
+        `- Si faltan datos, no los agregues; redacta solamente con lo disponible.\n` +
+        `- Devuelve solo el texto final, sin explicar el proceso.\n\n` +
+        `Texto original:\n${texto}`;
+    }
+
+    function construirSystem() {
+      return 'Eres un redactor profesional experto en español formal, reportes institucionales, paráfrasis y tarjetas informativas. Devuelves únicamente el texto final corregido.';
+    }
+
+    async function redactarIA() {
+      const texto = $('entrada').value.trim();
+      if (!texto) {
+        setStatus('Escribe un texto primero.', 'bad');
+        return;
+      }
+
+      const maxChars = Number($('maxChars').value || 3500);
+      if (texto.length > maxChars) {
+        setStatus('El texto es muy largo para una API GET. Recórtalo o sube el límite en configuración.', 'bad');
+        return;
+      }
+
+      $('btnIA').disabled = true;
+      setStatus('Redactando con IA por API GET...', 'warn');
+      $('salida').value = 'Generando redacción profesional...';
+      actualizarStats();
+
+      try {
+        const prompt = construirPrompt(texto);
+        const system = construirSystem();
+        const apiTemplate = $('apiUrl').value.trim() || DEFAULT_API;
+        const url = apiTemplate
+          .replaceAll('{prompt}', encodeURIComponent(prompt))
+          .replaceAll('{model}', encodeURIComponent($('modelo').value))
+          .replaceAll('{temperature}', encodeURIComponent($('temperature').value))
+          .replaceAll('{system}', encodeURIComponent(system));
+
+        const res = await fetch(url, { method: 'GET' });
+        if (!res.ok) throw new Error('Respuesta HTTP ' + res.status);
+
+        let out = await res.text();
+        out = limpiarRespuesta(out);
+
+        if (!out || out.length < 3) throw new Error('La API no devolvió texto válido');
+
+        $('salida').value = out;
+        guardarHistorial(texto, out, 'IA GET');
+        setStatus('Texto redactado correctamente con IA.', 'good');
+      } catch (err) {
+        console.error(err);
+        const local = generarLocal(texto);
+        $('salida').value = local;
+        guardarHistorial(texto, local, 'Local por respaldo');
+        setStatus('La API falló o bloqueó la solicitud. Se aplicó redacción local de respaldo.', 'bad');
+      } finally {
+        $('btnIA').disabled = false;
+        actualizarStats();
+      }
+    }
+
+    function limpiarRespuesta(texto) {
+      return texto
+        .replace(/^```[a-z]*\n?/i, '')
+        .replace(/```$/i, '')
+        .replace(/^Texto final:\s*/i, '')
+        .trim();
+    }
+
+    function redactarLocal() {
+      const texto = $('entrada').value.trim();
+      if (!texto) {
+        setStatus('Escribe un texto primero.', 'bad');
+        return;
+      }
+      const out = generarLocal(texto);
+      $('salida').value = out;
+      guardarHistorial(texto, out, 'Local');
+      setStatus('Texto redactado con el motor local.', 'good');
+      actualizarStats();
+    }
+
+    function generarLocal(texto) {
+      let t = texto.trim();
+      t = t.replace(/\s+/g, ' ');
+      t = t.replace(/\s+([,.])/g, '$1');
+      t = t.replace(/(^|[.!?]\s+)([a-záéíóúñ])/g, (m, p1, p2) => p1 + p2.toUpperCase());
+      t = t.replace(/\bq\b/gi, 'que');
+      t = t.replace(/\bxq\b/gi, 'porque');
+      t = t.replace(/\btmb\b/gi, 'también');
+      t = t.replace(/\bpc\b/gi, 'Protección Civil');
+      t = t.replace(/\bpm\b/gi, 'Policía Municipal');
+      t = t.replace(/\btransito\b/gi, 'Tránsito');
+      t = t.replace(/\bambulancia\b/gi, 'unidad de emergencia');
+
+      if (!/[.!?]$/.test(t)) t += '.';
+
+      const modo = $('modo').value;
+      if (modo === 'tarjeta911') {
+        return `Tarjeta informativa:\n\nSe recibe reporte relacionado con: ${t}\n\nCon base en la información proporcionada, se realiza la atención correspondiente y se mantiene el seguimiento del incidente conforme al procedimiento operativo.`;
+      }
+      if (modo === 'oficio') {
+        return `Asunto: Informe de hechos\n\nPor medio del presente, se informa lo siguiente:\n\n${t}\n\nSin otro particular, quedo a disposición para cualquier aclaración o información adicional que se requiera.`;
+      }
+      if (modo === 'reporte') {
+        return `Reporte operativo:\n\nHechos: ${t}\n\nAcciones realizadas: Se atiende la información proporcionada y se canaliza conforme a los procedimientos correspondientes.\n\nCierre: Se deja constancia para los fines administrativos y operativos conducentes.`;
+      }
+      if (modo === 'resumir') {
+        return `Resumen profesional:\n\n${t}`;
+      }
+      if (modo === 'parafrasear') {
+        return `Paráfrasis profesional:\n\n${t}`;
+      }
+      return `Redacción profesional:\n\n${t}`;
+    }
+
+    function actualizarStats() {
+      const out = $('salida').value.trim();
+      $('chars').textContent = out.length;
+      $('words').textContent = out ? out.split(/\s+/).length : 0;
+      const hist = JSON.parse(localStorage.getItem('redactor_historial') || '[]');
+      $('saved').textContent = hist.length;
+    }
+
+    function guardarHistorial(original, resultado, tipo) {
+      const hist = JSON.parse(localStorage.getItem('redactor_historial') || '[]');
+      hist.unshift({
+        fecha: new Date().toLocaleString('es-MX'),
+        tipo,
+        original,
+        resultado
+      });
+      localStorage.setItem('redactor_historial', JSON.stringify(hist.slice(0, 20)));
+      renderHistorial();
+    }
+
+    function renderHistorial() {
+      const hist = JSON.parse(localStorage.getItem('redactor_historial') || '[]');
+      const box = $('history');
+      box.innerHTML = '';
+      if (!hist.length) {
+        box.innerHTML = '<div class="mini">Todavía no hay textos guardados.</div>';
+        actualizarStats();
+        return;
+      }
+      hist.forEach((h) => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.innerHTML = `<small>${h.fecha} · ${h.tipo}</small><div>${escapeHtml(h.resultado.slice(0, 220))}${h.resultado.length > 220 ? '...' : ''}</div>`;
+        div.onclick = () => {
+          $('entrada').value = h.original;
+          $('salida').value = h.resultado;
+          actualizarStats();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+        box.appendChild(div);
+      });
+      actualizarStats();
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+      }[tag]));
+    }
+
+    async function pegarTexto() {
+      try {
+        const text = await navigator.clipboard.readText();
+        $('entrada').value = text;
+        setStatus('Texto pegado desde el portapapeles.', 'good');
+      } catch {
+        setStatus('No se pudo leer el portapapeles. Pega manualmente.', 'bad');
+      }
+    }
+
+    async function copiarResultado() {
+      const text = $('salida').value.trim();
+      if (!text) return setStatus('No hay resultado para copiar.', 'bad');
+      await navigator.clipboard.writeText(text);
+      setStatus('Resultado copiado.', 'good');
+    }
+
+    function descargarTXT() {
+      const text = $('salida').value.trim();
+      if (!text) return setStatus('No hay resultado para descargar.', 'bad');
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'redaccion_profesional.txt';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      setStatus('Archivo TXT descargado.', 'good');
+    }
+
+    function usarComoEntrada() {
+      const text = $('salida').value.trim();
+      if (!text) return setStatus('No hay resultado para usar.', 'bad');
+      $('entrada').value = text;
+      setStatus('Resultado movido a texto original.', 'good');
+    }
+
+    function leerResultado() {
+      const text = $('salida').value.trim();
+      if (!text) return setStatus('No hay resultado para leer.', 'bad');
+      speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'es-MX';
+      utter.rate = 0.98;
+      speechSynthesis.speak(utter);
+      setStatus('Leyendo resultado en voz alta.', 'good');
+    }
+
+    function limpiarEntrada() {
+      $('entrada').value = '';
+      setStatus('Entrada limpia.', 'good');
+    }
+
+    function limpiarTodo() {
+      $('entrada').value = '';
+      $('salida').value = '';
+      setStatus('Todo limpio.', 'good');
+      actualizarStats();
+    }
+
+    function borrarHistorial() {
+      localStorage.removeItem('redactor_historial');
+      renderHistorial();
+      setStatus('Historial eliminado.', 'good');
+    }
+
+    function guardarConfig() {
+      localStorage.setItem('redactor_api_url', $('apiUrl').value.trim());
+      localStorage.setItem('redactor_modelo', $('modelo').value);
+      localStorage.setItem('redactor_temperature', $('temperature').value);
+      setStatus('Configuración guardada.', 'good');
+    }
+
+    function restaurarConfig() {
+      $('apiUrl').value = DEFAULT_API;
+      $('modelo').value = 'openai';
+      $('temperature').value = '0.6';
+      guardarConfig();
+      setStatus('API restaurada a Pollinations GET.', 'good');
+    }
+
+    function cargarConfig() {
+      $('apiUrl').value = localStorage.getItem('redactor_api_url') || DEFAULT_API;
+      $('modelo').value = localStorage.getItem('redactor_modelo') || 'openai';
+      $('temperature').value = localStorage.getItem('redactor_temperature') || '0.6';
+    }
+
+    $('entrada').addEventListener('input', actualizarStats);
+    $('salida').addEventListener('input', actualizarStats);
+
+    cargarConfig();
+    renderHistorial();
+    actualizarStats();
+  </script>
+</body>
+</html>

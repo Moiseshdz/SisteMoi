@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checklist Cámaras</title>
+
+  <style>
+    :root {
+      --azul: #2563eb;
+      --azul2: #1e40af;
+      --verde: #16a34a;
+      --rojo: #dc2626;
+      --amarillo: #f59e0b;
+      --gris: #64748b;
+      --fondo: #eef2f7;
+      --borde: #e2e8f0;
+      --texto: #0f172a;
+      --sombra: 0 18px 40px rgba(15, 23, 42, .10);
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, .18), transparent 35%),
+        linear-gradient(135deg, #eef2f7, #f8fafc);
+      color: var(--texto);
+    }
+
+    .app {
+      max-width: 1300px;
+      margin: auto;
+    }
+
+    .header,
+    .panel {
+      background: rgba(255, 255, 255, .96);
+      border: 1px solid var(--borde);
+      border-radius: 24px;
+      box-shadow: var(--sombra);
+    }
+
+    .header {
+      padding: 28px;
+      margin-bottom: 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(24px, 4vw, 40px);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -1px;
+    }
+
+    .header p {
+      margin: 8px 0 0;
+      color: var(--gris);
+      font-weight: 700;
+    }
+
+    .fecha-box {
+      padding: 14px 18px;
+      border-radius: 16px;
+      background: #dbeafe;
+      color: #1d4ed8;
+      font-weight: 900;
+      text-transform: uppercase;
+      min-width: 230px;
+      text-align: center;
+    }
+
+    .panel {
+      padding: 24px;
+      margin-bottom: 22px;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 21px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .badge {
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: #eff6ff;
+      color: #1e40af;
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      padding: 18px;
+      border-radius: 18px;
+      background: white;
+      border: 1px solid var(--borde);
+      box-shadow: 0 10px 25px rgba(15, 23, 42, .06);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 5px;
+      background: var(--azul);
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--gris);
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .card span {
+      display: block;
+      margin-top: 8px;
+      color: var(--azul);
+      font-size: 34px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .ok::before {
+      background: var(--verde);
+    }
+
+    .ok span {
+      color: var(--verde);
+    }
+
+    .bad::before {
+      background: var(--rojo);
+    }
+
+    .bad span {
+      color: var(--rojo);
+    }
+
+    .total {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+    }
+
+    .total p {
+      color: #cbd5e1;
+    }
+
+    .total span {
+      color: white;
+    }
+
+    .formulario {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 12px;
+      padding: 18px;
+      margin-bottom: 18px;
+      background: white;
+      border: 1px solid var(--borde);
+      border-radius: 18px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 14px;
+      background: #f8fafc;
+      color: var(--texto);
+      font-size: 15px;
+      font-weight: 700;
+      outline: none;
+    }
+
+    textarea {
+      grid-column: 1 / -1;
+      min-height: 50px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--azul);
+      background: white;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, .14);
+    }
+
+    .checks {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+    }
+
+    .check-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--borde);
+      background: #f8fafc;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .check-card input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--azul);
+    }
+
+    button,
+    .btn-file {
+      border: none;
+      border-radius: 14px;
+      padding: 13px 16px;
+      background: linear-gradient(135deg, var(--azul), var(--azul2));
+      color: white;
+      font-size: 14px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 10px 22px rgba(37, 99, 235, .24);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    button:hover,
+    .btn-file:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-editar {
+      background: linear-gradient(135deg, #facc15, #f59e0b);
+      color: #111827;
+    }
+
+    .btn-eliminar {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+
+    .btn-verde {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+    }
+
+    .btn-gris,
+    .btn-file {
+      background: linear-gradient(135deg, #64748b, #475569);
+    }
+
+    .btn-morado {
+      background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    }
+
+    .btn-file input {
+      display: none;
+    }
+
+    .tabla-wrap {
+      overflow-x: auto;
+      border-radius: 18px;
+      border: 1px solid var(--borde);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      min-width: 760px;
+    }
+
+    thead {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+    }
+
+    th {
+      padding: 15px 12px;
+      color: white;
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    td {
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--borde);
+      font-size: 15px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    tbody tr:hover {
+      background: #f8fafc;
+    }
+
+    td button {
+      padding: 9px 12px;
+      font-size: 12px;
+      margin: 2px;
+    }
+
+    .sin-registros {
+      color: var(--gris);
+      font-weight: 900;
+      padding: 18px;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #e0f2fe;
+      color: #075985;
+      font-size: 12px;
+      font-weight: 900;
+      margin: 2px;
+    }
+
+    .tag-danger {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .acciones-finales {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+    }
+
+    pre {
+      background: #0f172a;
+      color: #e5e7eb;
+      border-radius: 18px;
+      padding: 20px;
+      overflow-x: auto;
+      font-size: 15px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      font-weight: 700;
+    }
+
+    .nota {
+      margin-top: 12px;
+      color: var(--gris);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 12px;
+      }
+
+      .header,
+      .panel {
+        padding: 18px;
+        border-radius: 18px;
+      }
+
+      .fecha-box,
+      .acciones-finales button,
+      .acciones-finales .btn-file {
+        width: 100%;
+      }
+
+      .formulario {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .formulario,
+      .acciones-finales,
+      .btn-editar,
+      .btn-eliminar {
+        display: none;
+      }
+
+      .header,
+      .panel {
+        box-shadow: none;
+        border: none;
+      }
+
+      pre {
+        background: white;
+        color: black;
+        border: 1px solid black;
+      }
+      p#moi{
+        font-size: 7px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="app">
+
+    <section class="header">
+      <div>
+        <h1>Checklist Cámaras</h1>
+        <p id="moi">Sistema Creado por Moises.</p>
+      </div>
+      <div class="fecha-box" id="fecha-hoy"></div>
+    </section>
+
+    <section class="panel">
+      <div class="section-title">
+        <h2>Inventario General</h2>
+        <span class="badge">Totales base</span>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <p>PTZ</p>
+          <span id="inv-ptz">0</span>
+        </div>
+        <div class="card">
+          <p>Fijas</p>
+          <span id="inv-fijas">0</span>
+        </div>
+        <div class="card">
+          <p>Analíticas</p>
+          <span id="inv-analiticas">0</span>
+        </div>
+        <div class="card">
+          <p>LPR</p>
+          <span id="inv-lpr">0</span>
+        </div>
+        <div class="card">
+          <p>Botón de Pánico</p>
+          <span id="inv-panico">0</span>
+        </div>
+      </div>
+
+      <p class="nota">
+        El sistema guarda automático en el navegador y también puede exportar/importar la base en TXT.
+      </p>
+    </section>
+
+    <section class="panel">
+      <div class="section-title">
+        <h2>Registrar Punto PTZ</h2>
+        <span class="badge">PTZ + F1 + F2</span>
+      </div>
+
+      <form class="formulario" id="form-catalogo">
+        <input type="text" id="cat-clave" placeholder="CLAVE EJEMPLO: 711" required>
+        <input type="text" id="cat-localidad" placeholder="LOCALIDAD EJEMPLO: MORELOS II" required>
+        <button type="submit" id="btn-catalogo">GUARDAR PUNTO</button>
+        <button type="button" class="btn-gris" onclick="cancelarEditarCatalogo()">CANCELAR</button>
+      </form>
+
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Clave</th>
+              <th>Equipos del Punto</th>
+              <th>Localidad</th>
+              <th colspan="2">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-catalogo"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-title">
+        <h2>Registrar Falla en Punto</h2>
+        <span class="badge">Marca solo lo que falló</span>
+      </div>
+
+      <form class="formulario" id="form-fuera-camara">
+        <select id="select-camara" required></select>
+
+        <div class="checks">
+          <label class="check-card">
+            <input type="checkbox" id="check-ptz" value="PTZ">
+            PTZ FUERA
+          </label>
+
+          <label class="check-card">
+            <input type="checkbox" id="check-f1" value="F1">
+            F1 FUERA
+          </label>
+
+          <label class="check-card">
+            <input type="checkbox" id="check-f2" value="F2">
+            F2 FUERA
+          </label>
+        </div>
+
+        <textarea id="obs-camara" placeholder="OBSERVACIÓN OPCIONAL"></textarea>
+
+        <button type="submit" id="btn-fuera">AGREGAR FALLA</button>
+        <button type="button" class="btn-gris" onclick="cancelarEditarFalla()">CANCELAR</button>
+      </form>
+
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Clave</th>
+              <th>Equipos Fuera</th>
+              <th>Localidad</th>
+              <th>Observación</th>
+              <th colspan="2">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-camaras-fuera"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-title">
+        <h2>Registrar Otros Equipos Fuera</h2>
+        <span class="badge">Cantidad</span>
+      </div>
+
+      <form class="formulario" id="form-otros">
+        <select id="tipo-otro">
+          <option value="analiticas">ANALÍTICAS</option>
+          <option value="lpr">LPR</option>
+          <option value="panico">BOTÓN DE PÁNICO</option>
+        </select>
+
+        <input type="number" id="cantidad-otro" min="1" placeholder="CANTIDAD" required>
+        <input type="text" id="localidad-otro" placeholder="LOCALIDAD" required>
+        <button type="submit" id="btn-otros">AGREGAR</button>
+        <button type="button" class="btn-gris" onclick="cancelarEditarOtro()">CANCELAR</button>
+      </form>
+
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Tipo</th>
+              <th>Cantidad</th>
+              <th>Localidad</th>
+              <th colspan="2">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-otros"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-title">
+        <h2>Cámaras Activas</h2>
+        <span class="badge">Disponibles</span>
+      </div>
+
+      <div class="grid">
+        <div class="card ok"><p>PTZ</p><span id="act-ptz">0</span></div>
+        <div class="card ok"><p>Fijas</p><span id="act-fijas">0</span></div>
+        <div class="card ok"><p>Analíticas</p><span id="act-analiticas">0</span></div>
+        <div class="card ok"><p>LPR</p><span id="act-lpr">0</span></div>
+        <div class="card ok"><p>Botón de Pánico</p><span id="act-panico">0</span></div>
+        <div class="card total"><p>Total Activas</p><span id="total-activas">0</span></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-title">
+        <h2>Cámaras Fuera</h2>
+        <span class="badge">Afectadas</span>
+      </div>
+
+      <div class="grid">
+        <div class="card bad"><p>PTZ</p><span id="fuera-ptz">0</span></div>
+        <div class="card bad"><p>Fijas</p><span id="fuera-fijas">0</span></div>
+        <div class="card bad"><p>Analíticas</p><span id="fuera-analiticas">0</span></div>
+        <div class="card bad"><p>LPR</p><span id="fuera-lpr">0</span></div>
+        <div class="card bad"><p>Botón de Pánico</p><span id="fuera-panico">0</span></div>
+        <div class="card total"><p>Total Fuera</p><span id="total-fuera">0</span></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-title">
+        <h2>Reporte Final</h2>
+        <span class="badge">Formato operativo</span>
+      </div>
+
+      <pre id="reporte-texto"></pre>
+    </section>
+
+    <section class="acciones-finales">
+      <button class="btn-verde" onclick="copiarReporte()">COPIAR REPORTE</button>
+      <button class="btn-verde" onclick="window.print()">IMPRIMIR</button>
+      <button class="btn-morado" onclick="exportarBaseTXT()">EXPORTAR BASE TXT</button>
+
+      <label class="btn-file">
+        IMPORTAR BASE TXT
+        <input type="file" accept=".txt,.json" onchange="importarBaseTXT(event)">
+      </label>
+
+      <button class="btn-gris" onclick="limpiarFuera()">LIMPIAR FALLAS</button>
+      <button class="btn-eliminar" onclick="borrarTodo()">BORRAR TODO</button>
+    </section>
+
+  </main>
+
+  <script>
+    const inventario = {
+      ptz: 50,
+      fijas: 74,
+      analiticas: 10,
+      lpr: 3,
+      panico: 2
+    };
+
+    const KEY_CATALOGO = "check_catalogo_puntos_ptz_f1_f2_v4";
+    const KEY_FUERA = "check_fallas_individuales_ptz_f1_f2_v4";
+    const KEY_OTROS = "check_otros_fuera_v4";
+
+    const catalogoInicial = [
+      { id: "cam_711", clave: "711", localidad: "MORELOS II" },
+      { id: "cam_717", clave: "717", localidad: "CRUCERO A ZARAGOZA" },
+      { id: "cam_718", clave: "718", localidad: "BOMBERO" },
+      { id: "cam_719", clave: "719", localidad: "NEGALUMA" },
+      { id: "cam_724", clave: "724", localidad: "ZAPOTAL" },
+      { id: "cam_729", clave: "729", localidad: "PLAZA CIVICA" },
+      { id: "cam_739", clave: "739", localidad: "Z6 Y PETROLERA" },
+      { id: "cam_741", clave: "741", localidad: "POZO BONANZA" },
+      { id: "cam_742", clave: "742", localidad: "ZONA 6-ESPERANZA" },
+      { id: "cam_750", clave: "750", localidad: "MERCADO ZONA 5B" },
+      { id: "cam_760", clave: "760", localidad: "LOMAS DEL SANTUARIO" }
+    ];
+
+    let catalogo = cargar(KEY_CATALOGO, catalogoInicial);
+    let camarasFuera = cargar(KEY_FUERA, []);
+    let otrosFuera = cargar(KEY_OTROS, []);
+
+    let editandoCatalogoId = null;
+    let editandoFallaId = null;
+    let editandoOtroId = null;
+
+    document.getElementById("fecha-hoy").textContent =
+      new Date().toLocaleDateString("es-MX", {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      });
+
+    function cargar(key, respaldo) {
+      try {
+        const data = localStorage.getItem(key);
+        return data ? JSON.parse(data) : JSON.parse(JSON.stringify(respaldo));
+      } catch {
+        return JSON.parse(JSON.stringify(respaldo));
+      }
+    }
+
+    function guardar() {
+      localStorage.setItem(KEY_CATALOGO, JSON.stringify(catalogo));
+      localStorage.setItem(KEY_FUERA, JSON.stringify(camarasFuera));
+      localStorage.setItem(KEY_OTROS, JSON.stringify(otrosFuera));
+    }
+
+    function crearId(prefix) {
+      return prefix + "_" + Date.now() + "_" + Math.floor(Math.random() * 9999);
+    }
+
+    function limpiarTexto(texto) {
+      return String(texto || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function numero(valor) {
+      return Number(valor) || 0;
+    }
+
+    function formato2(num) {
+      return String(num).padStart(2, "0");
+    }
+
+    function fechaReporte() {
+      return new Date().toLocaleDateString("es-MX", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric"
+      }).toUpperCase();
+    }
+
+    function buscarCamara(idCamara) {
+      return catalogo.find(c => c.id === idCamara);
+    }
+
+    function ordenarCatalogo() {
+      catalogo.sort((a, b) => Number(a.clave) - Number(b.clave));
+    }
+
+    function tag(equipo, rojo = false) {
+      return `<span class="tag ${rojo ? "tag-danger" : ""}">${limpiarTexto(equipo)}</span>`;
+    }
+
+    function nombreTipo(tipo) {
+      if (tipo === "analiticas") return "ANALÍTICAS";
+      if (tipo === "lpr") return "LPR";
+      if (tipo === "panico") return "BOTÓN DE PÁNICO";
+      return tipo.toUpperCase();
+    }
+
+    function renderCatalogo() {
+      const tbody = document.getElementById("tbody-catalogo");
+      tbody.innerHTML = "";
+
+      if (catalogo.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="sin-registros">SIN PUNTOS REGISTRADOS</td></tr>`;
+        return;
+      }
+
+      catalogo.forEach(c => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+          <td>${limpiarTexto(c.clave)}</td>
+          <td>${tag("PTZ")} ${tag("F1")} ${tag("F2")}</td>
+          <td>${limpiarTexto(c.localidad)}</td>
+          <td>
+            <button class="btn-editar" onclick="editarCatalogo('${c.id}')">EDITAR</button>
+          </td>
+          <td>
+            <button class="btn-eliminar" onclick="eliminarCatalogo('${c.id}')">ELIMINAR</button>
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function cargarSelect() {
+      const select = document.getElementById("select-camara");
+      const actual = select.value;
+
+      select.innerHTML = `<option value="">SELECCIONA CÁMARA / PUNTO</option>`;
+
+      catalogo.forEach(c => {
+        const option = document.createElement("option");
+        option.value = c.id;
+        option.textContent = `${c.clave} PTZ F1 F2 - ${c.localidad}`;
+        select.appendChild(option);
+      });
+
+      if (actual && catalogo.some(c => c.id === actual)) {
+        select.value = actual;
+      }
+    }
+
+    function renderCamarasFuera() {
+      const tbody = document.getElementById("tbody-camaras-fuera");
+      tbody.innerHTML = "";
+
+      if (camarasFuera.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="sin-registros">SIN FALLAS REGISTRADAS</td></tr>`;
+        return;
+      }
+
+      camarasFuera.forEach(reg => {
+        const cam = buscarCamara(reg.camaraId);
+        if (!cam) return;
+
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+          <td>${limpiarTexto(reg.fecha)}</td>
+          <td>${limpiarTexto(cam.clave)}</td>
+          <td>${reg.equiposFuera.map(e => tag(e, true)).join(" ")}</td>
+          <td>${limpiarTexto(cam.localidad)}</td>
+          <td>${limpiarTexto(reg.observacion || "-")}</td>
+          <td>
+            <button class="btn-editar" onclick="editarCamaraFuera('${reg.id}')">EDITAR</button>
+          </td>
+          <td>
+            <button class="btn-eliminar" onclick="eliminarCamaraFuera('${reg.id}')">ELIMINAR</button>
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderOtros() {
+      const tbody = document.getElementById("tbody-otros");
+      tbody.innerHTML = "";
+
+      if (otrosFuera.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="sin-registros">SIN REGISTROS</td></tr>`;
+        return;
+      }
+
+      otrosFuera.forEach(reg => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+          <td>${limpiarTexto(reg.fecha)}</td>
+          <td>${limpiarTexto(nombreTipo(reg.tipo))}</td>
+          <td>${limpiarTexto(reg.cantidad)}</td>
+          <td>${limpiarTexto(reg.localidad)}</td>
+          <td>
+            <button class="btn-editar" onclick="editarOtro('${reg.id}')">EDITAR</button>
+          </td>
+          <td>
+            <button class="btn-eliminar" onclick="eliminarOtro('${reg.id}')">ELIMINAR</button>
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function contarFuera() {
+      const fuera = {
+        ptz: 0,
+        fijas: 0,
+        analiticas: 0,
+        lpr: 0,
+        panico: 0
+      };
+
+      camarasFuera.forEach(reg => {
+        reg.equiposFuera.forEach(equipo => {
+          if (equipo === "PTZ") {
+            fuera.ptz++;
+          }
+
+          if (equipo === "F1" || equipo === "F2") {
+            fuera.fijas++;
+          }
+        });
+      });
+
+      otrosFuera.forEach(reg => {
+        if (reg.tipo === "analiticas") {
+          fuera.analiticas += numero(reg.cantidad);
+        }
+
+        if (reg.tipo === "lpr") {
+          fuera.lpr += numero(reg.cantidad);
+        }
+
+        if (reg.tipo === "panico") {
+          fuera.panico += numero(reg.cantidad);
+        }
+      });
+
+      return fuera;
+    }
+
+    function calcular() {
+      const fuera = contarFuera();
+
+      const activas = {
+        ptz: Math.max(inventario.ptz - fuera.ptz, 0),
+        fijas: Math.max(inventario.fijas - fuera.fijas, 0),
+        analiticas: Math.max(inventario.analiticas - fuera.analiticas, 0),
+        lpr: Math.max(inventario.lpr - fuera.lpr, 0),
+        panico: Math.max(inventario.panico - fuera.panico, 0)
+      };
+
+      const totalFuera =
+        fuera.ptz +
+        fuera.fijas +
+        fuera.analiticas +
+        fuera.lpr +
+        fuera.panico;
+
+      const totalActivas =
+        activas.ptz +
+        activas.fijas +
+        activas.analiticas +
+        activas.lpr +
+        activas.panico;
+
+      document.getElementById("inv-ptz").textContent = inventario.ptz;
+      document.getElementById("inv-fijas").textContent = inventario.fijas;
+      document.getElementById("inv-analiticas").textContent = formato2(inventario.analiticas);
+      document.getElementById("inv-lpr").textContent = formato2(inventario.lpr);
+      document.getElementById("inv-panico").textContent = formato2(inventario.panico);
+
+      document.getElementById("fuera-ptz").textContent = formato2(fuera.ptz);
+      document.getElementById("fuera-fijas").textContent = formato2(fuera.fijas);
+      document.getElementById("fuera-analiticas").textContent = formato2(fuera.analiticas);
+      document.getElementById("fuera-lpr").textContent = formato2(fuera.lpr);
+      document.getElementById("fuera-panico").textContent = formato2(fuera.panico);
+      document.getElementById("total-fuera").textContent = formato2(totalFuera);
+
+      document.getElementById("act-ptz").textContent = formato2(activas.ptz);
+      document.getElementById("act-fijas").textContent = formato2(activas.fijas);
+      document.getElementById("act-analiticas").textContent = formato2(activas.analiticas);
+      document.getElementById("act-lpr").textContent = formato2(activas.lpr);
+      document.getElementById("act-panico").textContent = formato2(activas.panico);
+      document.getElementById("total-activas").textContent = totalActivas;
+
+      generarReporte(fuera, activas, totalFuera, totalActivas);
+    }
+
+    function generarReporte(fuera, activas, totalFuera, totalActivas) {
+      let lista = "";
+
+      camarasFuera.forEach((reg, index) => {
+        const cam = buscarCamara(reg.camaraId);
+        if (!cam) return;
+
+        lista += `${index + 1}.  ${cam.clave} ${reg.equiposFuera.join(" ")} -------------------- ${cam.localidad}.\n`;
+      });
+
+      if (!lista) {
+        lista = "SIN PTZ, F1 O F2 FUERA DE LÍNEA.\n";
+      }
+
+      const texto = `CHECKLIST CAMARAS ${fechaReporte()}.
+
+       PTZ: ${inventario.ptz}
+     FIJAS: ${inventario.fijas}
+ANALITICAS: ${formato2(inventario.analiticas)}
+       LPR: ${formato2(inventario.lpr)}
+
+${lista}
+CAMARAS ACTIVAS: ${totalActivas}
+            PTZ: ${formato2(activas.ptz)}
+          FIJAS: ${formato2(activas.fijas)}
+     ANALITICAS: ${formato2(activas.analiticas)}
+            LPR: ${formato2(activas.lpr)}
+BOTON DE PANICO: ${formato2(activas.panico)}
+
+ CAMARAS FUERAS: ${formato2(totalFuera)}
+            PTZ: ${formato2(fuera.ptz)}
+          FIJAS: ${formato2(fuera.fijas)}
+     ANALITICAS: ${formato2(fuera.analiticas)}
+            LPR: ${formato2(fuera.lpr)}
+BOTON DE PANICO: ${formato2(fuera.panico)}
+----------------------------------`;
+
+      document.getElementById("reporte-texto").textContent = texto;
+    }
+
+    function editarCatalogo(idCam) {
+      const camara = buscarCamara(idCam);
+
+      if (!camara) return;
+
+      editandoCatalogoId = idCam;
+
+      document.getElementById("cat-clave").value = camara.clave;
+      document.getElementById("cat-localidad").value = camara.localidad;
+      document.getElementById("btn-catalogo").textContent = "ACTUALIZAR PUNTO";
+
+      window.scrollTo({
+        top: document.getElementById("form-catalogo").offsetTop - 30,
+        behavior: "smooth"
+      });
+    }
+
+    function cancelarEditarCatalogo() {
+      editandoCatalogoId = null;
+
+      document.getElementById("form-catalogo").reset();
+      document.getElementById("btn-catalogo").textContent = "GUARDAR PUNTO";
+    }
+
+    function editarCamaraFuera(idReg) {
+      const registro = camarasFuera.find(r => r.id === idReg);
+
+      if (!registro) return;
+
+      editandoFallaId = idReg;
+
+      document.getElementById("select-camara").value = registro.camaraId;
+      document.getElementById("check-ptz").checked = registro.equiposFuera.includes("PTZ");
+      document.getElementById("check-f1").checked = registro.equiposFuera.includes("F1");
+      document.getElementById("check-f2").checked = registro.equiposFuera.includes("F2");
+      document.getElementById("obs-camara").value = registro.observacion || "";
+      document.getElementById("btn-fuera").textContent = "ACTUALIZAR FALLA";
+
+      window.scrollTo({
+        top: document.getElementById("form-fuera-camara").offsetTop - 30,
+        behavior: "smooth"
+      });
+    }
+
+    function cancelarEditarFalla() {
+      editandoFallaId = null;
+
+      document.getElementById("form-fuera-camara").reset();
+      document.getElementById("btn-fuera").textContent = "AGREGAR FALLA";
+    }
+
+    function editarOtro(idReg) {
+      const registro = otrosFuera.find(r => r.id === idReg);
+
+      if (!registro) return;
+
+      editandoOtroId = idReg;
+
+      document.getElementById("tipo-otro").value = registro.tipo;
+      document.getElementById("cantidad-otro").value = registro.cantidad;
+      document.getElementById("localidad-otro").value = registro.localidad;
+      document.getElementById("btn-otros").textContent = "ACTUALIZAR";
+
+      window.scrollTo({
+        top: document.getElementById("form-otros").offsetTop - 30,
+        behavior: "smooth"
+      });
+    }
+
+    function cancelarEditarOtro() {
+      editandoOtroId = null;
+
+      document.getElementById("form-otros").reset();
+      document.getElementById("btn-otros").textContent = "AGREGAR";
+    }
+
+    document.getElementById("form-catalogo").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const clave = document.getElementById("cat-clave").value.trim().toUpperCase();
+      const localidad = document.getElementById("cat-localidad").value.trim().toUpperCase();
+
+      if (!clave || !localidad) {
+        alert("Ingresa clave y localidad.");
+        return;
+      }
+
+      const claveExiste = catalogo.some(c => {
+        return c.clave === clave && c.id !== editandoCatalogoId;
+      });
+
+      if (claveExiste) {
+        alert("Esa clave ya existe.");
+        return;
+      }
+
+      if (editandoCatalogoId) {
+        const camara = buscarCamara(editandoCatalogoId);
+
+        if (camara) {
+          camara.clave = clave;
+          camara.localidad = localidad;
+        }
+
+        cancelarEditarCatalogo();
+      } else {
+        catalogo.push({
+          id: crearId("cam"),
+          clave,
+          localidad
+        });
+
+        document.getElementById("form-catalogo").reset();
+      }
+
+      guardar();
+      render();
+    });
+
+    document.getElementById("form-fuera-camara").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const camaraId = document.getElementById("select-camara").value;
+      const cam = buscarCamara(camaraId);
+      const observacion = document.getElementById("obs-camara").value.trim().toUpperCase();
+
+      if (!cam) {
+        alert("Selecciona una cámara.");
+        return;
+      }
+
+      const equiposFuera = [];
+
+      if (document.getElementById("check-ptz").checked) {
+        equiposFuera.push("PTZ");
+      }
+
+      if (document.getElementById("check-f1").checked) {
+        equiposFuera.push("F1");
+      }
+
+      if (document.getElementById("check-f2").checked) {
+        equiposFuera.push("F2");
+      }
+
+      if (equiposFuera.length === 0) {
+        alert("Selecciona qué falló: PTZ, F1 o F2.");
+        return;
+      }
+
+      if (editandoFallaId) {
+        const registro = camarasFuera.find(r => r.id === editandoFallaId);
+
+        if (registro) {
+          registro.camaraId = camaraId;
+          registro.equiposFuera = equiposFuera;
+          registro.observacion = observacion;
+          registro.fecha = new Date().toLocaleString("es-MX");
+        }
+
+        cancelarEditarFalla();
+      } else {
+        const existente = camarasFuera.find(r => r.camaraId === camaraId);
+
+        if (existente) {
+          existente.equiposFuera = Array.from(new Set([...existente.equiposFuera, ...equiposFuera]));
+          existente.observacion = observacion || existente.observacion;
+          existente.fecha = new Date().toLocaleString("es-MX");
+        } else {
+          camarasFuera.push({
+            id: crearId("fuera"),
+            camaraId,
+            equiposFuera,
+            observacion,
+            fecha: new Date().toLocaleString("es-MX")
+          });
+        }
+
+        document.getElementById("form-fuera-camara").reset();
+      }
+
+      guardar();
+      render();
+    });
+
+    document.getElementById("form-otros").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const tipo = document.getElementById("tipo-otro").value;
+      const cantidad = numero(document.getElementById("cantidad-otro").value);
+      const localidad = document.getElementById("localidad-otro").value.trim().toUpperCase();
+
+      if (cantidad <= 0 || !localidad) {
+        alert("Ingresa cantidad y localidad.");
+        return;
+      }
+
+      if (editandoOtroId) {
+        const registro = otrosFuera.find(r => r.id === editandoOtroId);
+
+        if (registro) {
+          registro.tipo = tipo;
+          registro.cantidad = cantidad;
+          registro.localidad = localidad;
+          registro.fecha = new Date().toLocaleString("es-MX");
+        }
+
+        cancelarEditarOtro();
+      } else {
+        otrosFuera.push({
+          id: crearId("otro"),
+          tipo,
+          cantidad,
+          localidad,
+          fecha: new Date().toLocaleString("es-MX")
+        });
+
+        document.getElementById("form-otros").reset();
+      }
+
+      guardar();
+      render();
+    });
+
+    function eliminarCatalogo(idCam) {
+      if (!confirm("¿Eliminar este punto del catálogo?")) return;
+
+      catalogo = catalogo.filter(c => c.id !== idCam);
+      camarasFuera = camarasFuera.filter(r => r.camaraId !== idCam);
+
+      guardar();
+      render();
+    }
+
+    function eliminarCamaraFuera(idReg) {
+      if (!confirm("¿Eliminar este registro de falla?")) return;
+
+      camarasFuera = camarasFuera.filter(r => r.id !== idReg);
+
+      guardar();
+      render();
+    }
+
+    function eliminarOtro(idReg) {
+      if (!confirm("¿Eliminar este registro?")) return;
+
+      otrosFuera = otrosFuera.filter(r => r.id !== idReg);
+
+      guardar();
+      render();
+    }
+
+    function limpiarFuera() {
+      if (!confirm("¿Limpiar todas las fallas registradas?")) return;
+
+      camarasFuera = [];
+      otrosFuera = [];
+
+      cancelarEditarFalla();
+      cancelarEditarOtro();
+
+      guardar();
+      render();
+    }
+
+    function borrarTodo() {
+      if (!confirm("¿Borrar todo, catálogo y registros?")) return;
+
+      catalogo = [];
+      camarasFuera = [];
+      otrosFuera = [];
+
+      cancelarEditarCatalogo();
+      cancelarEditarFalla();
+      cancelarEditarOtro();
+
+      guardar();
+      render();
+    }
+
+    function copiarReporte() {
+      const texto = document.getElementById("reporte-texto").textContent;
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(texto);
+        alert("Reporte copiado.");
+      } else {
+        const area = document.createElement("textarea");
+        area.value = texto;
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand("copy");
+        document.body.removeChild(area);
+        alert("Reporte copiado.");
+      }
+    }
+
+    function obtenerBaseDatosTXT() {
+      return {
+        metadata: {
+          nombre: "CHECKLIST_CAMARAS_DB",
+          tipo: "BASE_DATOS_TXT",
+          version: "1.0",
+          fechaExportacion: new Date().toLocaleString("es-MX"),
+          descripcion: "Base de datos local del checklist de cámaras"
+        },
+        inventario: {
+          ptz: inventario.ptz,
+          fijas: inventario.fijas,
+          analiticas: inventario.analiticas,
+          lpr: inventario.lpr,
+          panico: inventario.panico
+        },
+        catalogo: catalogo,
+        camarasFuera: camarasFuera,
+        otrosFuera: otrosFuera
+      };
+    }
+
+    function exportarBaseTXT() {
+      const base = obtenerBaseDatosTXT();
+      const contenido = JSON.stringify(base, null, 2);
+
+      const blob = new Blob([contenido], {
+        type: "text/plain;charset=utf-8"
+      });
+
+      const url = URL.createObjectURL(blob);
+
+      const fecha = new Date().toISOString().slice(0, 10);
+      const enlace = document.createElement("a");
+
+      enlace.href = url;
+      enlace.download = `checklist_camaras_db_${fecha}.txt`;
+      document.body.appendChild(enlace);
+      enlace.click();
+      document.body.removeChild(enlace);
+
+      URL.revokeObjectURL(url);
+
+      alert("Base TXT exportada correctamente.");
+    }
+
+    function importarBaseTXT(event) {
+      const archivo = event.target.files[0];
+
+      if (!archivo) return;
+
+      const lector = new FileReader();
+
+      lector.onload = function(e) {
+        try {
+          const contenido = e.target.result;
+          const base = JSON.parse(contenido);
+
+          if (
+            !base ||
+            !Array.isArray(base.catalogo) ||
+            !Array.isArray(base.camarasFuera) ||
+            !Array.isArray(base.otrosFuera)
+          ) {
+            alert("El archivo TXT no contiene una base válida.");
+            event.target.value = "";
+            return;
+          }
+
+          const confirmar = confirm("¿Deseas cargar esta base TXT? Esto reemplazará los datos actuales del sistema.");
+
+          if (!confirmar) {
+            event.target.value = "";
+            return;
+          }
+
+          catalogo = base.catalogo;
+          camarasFuera = base.camarasFuera;
+          otrosFuera = base.otrosFuera;
+
+          if (base.inventario && typeof base.inventario === "object") {
+            inventario.ptz = numero(base.inventario.ptz);
+            inventario.fijas = numero(base.inventario.fijas);
+            inventario.analiticas = numero(base.inventario.analiticas);
+            inventario.lpr = numero(base.inventario.lpr);
+            inventario.panico = numero(base.inventario.panico);
+          }
+
+          cancelarEditarCatalogo();
+          cancelarEditarFalla();
+          cancelarEditarOtro();
+
+          guardar();
+          render();
+
+          alert("Base TXT importada correctamente.");
+        } catch (error) {
+          alert("Error al leer el archivo. Verifica que sea el TXT correcto.");
+        }
+
+        event.target.value = "";
+      };
+
+      lector.readAsText(archivo);
+    }
+
+    function render() {
+      ordenarCatalogo();
+      renderCatalogo();
+      cargarSelect();
+      renderCamarasFuera();
+      renderOtros();
+      calcular();
+    }
+
+    render();
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Traductor de Claves Radio</title>
+  <style>
+    :root{
+      --bg:#08111f; --card:#0f1d33; --card2:#122642; --txt:#edf5ff; --muted:#9db0c9;
+      --blue:#38bdf8; --green:#22c55e; --red:#ef4444; --yellow:#facc15; --line:#24415f;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(135deg,#050a13,#0b1b31 55%,#07111f);color:var(--txt);min-height:100vh;padding:18px}
+    .wrap{max-width:1150px;margin:auto}
+    .hero{background:rgba(15,29,51,.9);border:1px solid var(--line);border-radius:24px;padding:20px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+    h1{margin:0;font-size:clamp(24px,4vw,40px);letter-spacing:.5px}
+    .sub{color:var(--muted);margin-top:8px;line-height:1.45}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+    @media(max-width:850px){.grid{grid-template-columns:1fr}}
+    .box{background:rgba(18,38,66,.85);border:1px solid var(--line);border-radius:18px;padding:14px}
+    label{display:block;font-weight:700;margin-bottom:8px;color:#dbeafe}
+    textarea{width:100%;min-height:210px;resize:vertical;border:1px solid #31577c;background:#071526;color:var(--txt);border-radius:14px;padding:14px;font-size:16px;line-height:1.5;outline:none}
+    textarea:focus,input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(56,189,248,.15)}
+    .out{white-space:pre-wrap;word-break:break-word;min-height:210px;background:#061120;border:1px solid #31577c;border-radius:14px;padding:14px;font-size:18px;line-height:1.6}
+    .buttons{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+    button{border:0;border-radius:12px;padding:12px 14px;font-weight:800;cursor:pointer;color:#04111f;background:var(--blue)}
+    button:hover{filter:brightness(1.08)}
+    .ok{background:var(--green)}.danger{background:var(--red);color:white}.warn{background:var(--yellow)}
+    .mini{font-size:13px;color:var(--muted);margin-top:10px}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .chip{border:1px solid var(--line);background:#071526;color:#dbeafe;border-radius:999px;padding:8px 10px;font-size:13px;cursor:pointer}
+    .chip:hover{border-color:var(--blue)}
+    .panel{margin-top:16px;background:rgba(15,29,51,.75);border:1px solid var(--line);border-radius:18px;padding:14px}
+    .row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px}
+    @media(max-width:700px){.row{grid-template-columns:1fr}.row button{width:100%}}
+    input{width:100%;border:1px solid #31577c;background:#071526;color:var(--txt);border-radius:12px;padding:12px;font-size:15px;outline:none}
+    details{margin-top:16px;background:rgba(15,29,51,.65);border:1px solid var(--line);border-radius:18px;padding:12px}
+    summary{cursor:pointer;font-weight:800;color:#dbeafe}
+    .tabla{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;max-height:320px;overflow:auto;padding-right:5px}
+    @media(max-width:850px){.tabla{grid-template-columns:1fr}}
+    .item{background:#071526;border:1px solid #213c59;border-radius:12px;padding:10px;font-size:13px;line-height:1.35}
+    .code{display:inline-block;color:#7dd3fc;font-weight:900;margin-right:6px}
+    .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#052e16;color:#dcfce7;border:1px solid #166534;padding:12px 16px;border-radius:14px;display:none;z-index:99}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <h1>Traductor de Claves Radio</h1>
+    <div class="sub">Escribe una frase normal y el sistema la convierte a claves. También detecta placas o números cuando escribes <b>placa ABC123</b>.</div>
+
+    <div class="grid">
+      <div class="box">
+        <label for="entrada">Lo que quieres decir</label>
+        <textarea id="entrada" placeholder="Ejemplo: un auxilio en colonia une calle 15 de mayo domicilio color azul hay un masculino lesionado por accidente de transito"></textarea>
+        <div class="buttons">
+          <button onclick="traducir()">Convertir a claves</button>
+          <button class="ok" onclick="copiar()">Copiar resultado</button>
+          <button class="danger" onclick="limpiar()">Limpiar</button>
+        </div>
+        <div class="mini">Consejo: usa palabras completas como colonia, calle, domicilio, masculino, femenino, accidente, ambulancia, incendio, robo, detenido, etc.</div>
+      </div>
+
+      <div class="box">
+        <label>Resultado para radio</label>
+        <div id="salida" class="out">Aquí aparecerá la conversión...</div>
+        <div class="chips">
+          <span class="chip" onclick="ejemplo(0)">Ejemplo auxilio</span>
+          <span class="chip" onclick="ejemplo(1)">Ejemplo tránsito</span>
+          <span class="chip" onclick="ejemplo(2)">Ejemplo robo</span>
+          <span class="chip" onclick="ejemplo(3)">Ejemplo placa</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <label>Agregar clave personalizada</label>
+      <div class="row">
+        <input id="nuevoTermino" placeholder="Palabra o frase: golpe de calor" />
+        <input id="nuevoCodigo" placeholder="Código: P-13" />
+        <input id="nuevaDesc" placeholder="Descripción: Enfermo / valoración médica" />
+        <button class="warn" onclick="agregarPersonalizada()">Guardar</button>
+      </div>
+      <div class="mini">Se guarda en este navegador con localStorage. Puedes agregar términos médicos cortos o claves internas.</div>
+    </div>
+
+    <details>
+      <summary>Ver catálogo cargado</summary>
+      <div id="catalogoVista" class="tabla"></div>
+    </details>
+  </section>
+</div>
+<div class="toast" id="toast">Listo</div>
+
+<script>
+  const ejemplos = [
+    'un auxilio en colonia une calle 15 de mayo domicilio color azul hay un masculino lesionado por accidente de transito',
+    'servicio por accidente de transito en avenida central con motocicleta y automovil particular masculino herido solicita ambulancia',
+    'emergencia por robo a mano armada en tienda de abarrotes hay un detenido y un sospechoso con arma de fuego corta',
+    'ubicacion de vehiculo particular con placa ABC123 en colonia centro calle reforma'
+  ];
+
+  const CATALOGO = [];
+  function add(code, desc, terms){
+    CATALOGO.push({ code, desc, terms: terms.map(normaliza) });
+  }
+
+  // CLAVES PRINCIPALES 1-67
+  add('1', 'Rutina', ['rutina']);
+  add('2', 'Servicio', ['servicio']);
+  add('3', 'Emergencia', ['emergencia']);
+  add('4', 'Negativo', ['negativo', 'no procede', 'sin efecto']);
+  add('5', 'Relevo', ['relevo']);
+  add('6', 'Investigación', ['investigacion', 'investigar']);
+  add('7 / A-24', 'Alimentos / comida', ['alimentos', 'comida', 'comer']);
+  add('ALFA', 'Baño', ['baño', 'sanitario']);
+  add('8 / A-6', 'Falsa alarma', ['falsa alarma']);
+  add('9', 'Cierre de camino', ['cierre de camino', 'camino cerrado', 'bloqueo de camino']);
+  add('10 / A-27', 'Novedades', ['novedades', 'novedad relevante']);
+  add('11 / C-10', 'Radio portátil', ['radio', 'radio portatil']);
+  add('12 / A-15', 'Ubicación', ['ubicacion', 'ubicación']);
+  add('13 / O-1', 'Auxilio / apoyo', ['auxilio', 'apoyo']);
+  add('14 / O-1', 'Ayuda', ['ayuda']);
+  add('15 / C-6 / A-1', 'Combustible / gasolina', ['combustible', 'gasolina', 'abastecer combustible']);
+  add('16 / A-7', 'Alterar el orden / escandalizar', ['alterar el orden', 'alteracion del orden', 'escandalizar', 'escandalo']);
+  add('17', 'Abandono de persona', ['abandono de persona']);
+  add('18', 'Vehículo abandonado', ['vehiculo abandonado', 'auto abandonado']);
+  add('19 / E-12', 'Accidente de tránsito', ['accidente de transito', 'hecho de transito', 'percance vial']);
+  add('20', 'Periodista / reportero', ['periodista', 'reportero']);
+  add('21 / V-1', 'Ambulancia', ['ambulancia']);
+  add('22 / A-12', 'Incendio / siniestro', ['incendio', 'siniestro']);
+  add('23 / V-9', 'Grúa', ['grua', 'grúa']);
+  add('24 / P-15', 'Detención / detenido', ['detencion', 'detención', 'detenido', 'asegurado']);
+  add('25 / V-6', 'Camioneta de carga / pick-up', ['camioneta de carga', 'camioneta', 'pickup', 'pick up']);
+  add('26 / V-4', 'Camión de carga', ['camion de carga', 'camión de carga', 'trailer', 'tractocamion']);
+  add('27 / V-4', 'Autobús', ['autobus', 'autobús']);
+  add('28 / V-7', 'Automóvil / vehículo particular', ['automovil', 'automóvil', 'vehiculo particular', 'vehículo particular', 'carro', 'coche']);
+  add('29', 'Médico', ['medico', 'médico', 'doctor']);
+  add('30', 'Solicita MP', ['solicita mp', 'ministerio publico', 'ministerio público', 'mp']);
+  add('31 / COCA', 'Transmisión defectuosa', ['transmision defectuosa', 'se escucha mal', 'no se escucha']);
+  add('32 / SIERRA', 'Transmisión correcta', ['transmision correcta', 'se escucha bien', 'copiado claro']);
+  add('33 / PAPA / O-5', 'Repetir mensaje', ['repetir mensaje', 'repita mensaje', 'repita submensaje']);
+  add('34', 'Suspenda transmisión', ['suspenda transmision', 'suspender transmision']);
+  add('35', 'Orden', ['orden']);
+  add('36 / C-1 / C-2', 'Arma de fuego', ['arma de fuego', 'pistola', 'rifle']);
+  add('37 / C-11', 'Arma blanca', ['arma blanca', 'cuchillo', 'machete']);
+  add('38 / A-19', 'Escolta', ['escolta', 'escoltar']);
+  add('39 / A-22', 'Teléfono / llamada telefónica', ['telefono', 'teléfono', 'celular', 'llamada telefonica', 'llamada telefónica']);
+  add('40', 'Mensaje', ['mensaje']);
+  add('41 / A-2', 'Contacto', ['contacto', 'hacer contacto']);
+  add('42', 'Datos', ['datos']);
+  add('43 / V-3', 'Motocicleta', ['motocicleta', 'moto', 'motopatrulla']);
+  add('44 / A-8', 'Concentración / marcha / mitin', ['concentracion', 'concentración', 'marcha', 'mitin']);
+  add('45 / V-8', 'Falla mecánica', ['falla mecanica', 'falla mecánica', 'descompuesto']);
+  add('46 / E-11', 'Congestionamiento de tránsito / tráfico lento', ['congestionamiento de transito', 'trafico lento', 'tráfico lento', 'congestionamiento vial']);
+  add('47', 'Relaciones públicas', ['relaciones publicas', 'relaciones públicas']);
+  add('48', 'Custodia de vehículo accidentado', ['custodia de vehiculo accidentado', 'custodia de vehículo accidentado']);
+  add('49', 'Custodia de vehículo privado', ['custodia de vehiculo privado', 'custodia de vehículo privado']);
+  add('50 / P-21 / P-22', 'Delincuente peligroso armado', ['delincuente peligroso armado', 'persona peligrosa armada']);
+  add('51 / P-11', 'Muerto / cadáver', ['muerto', 'cadaver', 'cadáver', 'sin vida']);
+  add('52 / P-26 / P-28', 'Borracho / ebrio', ['borracho', 'ebrio', 'alcoholizado', 'ebrio escandaloso', 'ebrio manejando']);
+  add('53 / O-7', 'Enterado', ['enterado', 'recibido']);
+  add('54 / O-2', 'Pendiente', ['pendiente', 'estar pendiente']);
+  add('55 / P-12', 'Lesionado / herido', ['lesionado', 'herido', 'lastimado']);
+  add('56 / A-11 / P-20', 'Asaltante / ladrón', ['asaltante', 'ladron', 'ladrón']);
+  add('57 / A-10 / P-32', 'Secuestro', ['secuestro', 'secuestrado']);
+  add('58 / A-9', 'Delito sexual / violación', ['delito sexual', 'violacion', 'violación']);
+  add('59', 'Personas ligadas con crimen organizado', ['personas ligadas con crimen organizado', 'crimen organizado']);
+  add('60 / P-16', 'Droga / drogado', ['droga', 'drogado', 'narcotico', 'narcótico']);
+  add('61 / A-11', 'Robo / asalto', ['robo', 'asalto', 'robo con violencia']);
+  add('62', 'Tráfico', ['trafico', 'tráfico']);
+  add('63', 'Enfrentamiento con arma de fuego', ['enfrentamiento con arma de fuego', 'balacera']);
+  add('64', 'Cruce fronterizo', ['cruce fronterizo']);
+  add('65', 'Falso', ['falso']);
+  add('66', 'Alarma general', ['alarma general']);
+  add('67 / L-46', 'Centro de Reinserción / CERESO / Penal', ['centro de reinsercion', 'cereso', 'penal']);
+
+  // LUGARES L
+  add('L-1', 'Aeropuerto', ['aeropuerto']);
+  add('L-2', 'Terminal de autobuses', ['terminal de autobuses', 'terminal']);
+  add('L-3', 'Auditorio / poliforum', ['auditorio', 'poliforum']);
+  add('L-4', 'Estadio', ['estadio']);
+  add('L-5', 'Parque', ['parque']);
+  add('L-6', 'Cine', ['cine']);
+  add('L-7', 'Feria Chiapas', ['feria chiapas']);
+  add('L-8', 'Cañón del Sumidero', ['cañon del sumidero', 'cañón del sumidero']);
+  add('L-9', 'Ciudad Deportiva', ['ciudad deportiva']);
+  add('L-10', 'Zoológico', ['zoologico', 'zoológico']);
+  add('L-11', 'Avenida', ['avenida', 'av']);
+  add('L-12', 'Calle', ['calle']);
+  add('L-13', 'Libramiento', ['libramiento']);
+  add('L-14', 'Carretera / terracería', ['carretera', 'terraceria', 'terracería']);
+  add('L-15', 'Crucero / entronque', ['crucero', 'entronque']);
+  add('L-16', 'Colonia / fraccionamiento', ['colonia', 'fraccionamiento', 'fracc']);
+  add('L-17', 'Domicilio', ['domicilio', 'casa', 'vivienda']);
+  add('L-18', 'Ciudad', ['ciudad']);
+  add('L-19', 'Municipio', ['municipio']);
+  add('L-20', 'Ranchería', ['rancheria', 'ranchería']);
+  add('L-21', 'Banco', ['banco']);
+  add('L-22', 'Instalaciones tomadas', ['instalaciones tomadas']);
+  add('L-23', 'Escuela', ['escuela']);
+  add('L-24', 'Iglesia', ['iglesia']);
+  add('L-25', 'Mercado', ['mercado']);
+  add('L-26', 'Tienda de abarrotes', ['tienda de abarrotes', 'abarrotes', 'tienda']);
+  add('L-27', 'Fuente / monumento', ['fuente', 'monumento']);
+  add('L-28', 'Cantina / bar', ['cantina', 'bar']);
+  add('L-29', 'Lugar de bailar / club', ['lugar de bailar', 'club', 'discoteca']);
+  add('L-30', 'Zona de tolerancia', ['zona de tolerancia']);
+  add('L-31', 'Hotel', ['hotel']);
+  add('L-32', 'Hospital', ['hospital']);
+  add('L-33', 'DIF', ['dif']);
+  add('L-34', 'Cruz Roja', ['cruz roja']);
+  add('L-35', 'Farmacia', ['farmacia']);
+  add('L-36', 'Funeraria', ['funeraria']);
+  add('L-37', 'Cementerio', ['cementerio', 'panteon', 'panteón']);
+  add('L-38', 'Gasolinera', ['gasolinera']);
+  add('L-39', 'Taller mecánico', ['taller mecanico', 'taller mecánico']);
+  add('L-40', 'Palacio de Gobierno Federal', ['palacio de gobierno federal']);
+  add('L-41', 'Casa de Gobierno', ['casa de gobierno']);
+  add('L-42', 'Palacio de Gobierno Estatal', ['palacio de gobierno estatal']);
+  add('L-43', 'Palacio Municipal', ['palacio municipal', 'presidencia municipal']);
+  add('L-44', 'Congreso del Estado', ['congreso del estado']);
+  add('L-45', 'Oficinas de la PFP', ['oficinas de la pfp', 'pfp']);
+  add('L-47', 'Corralón de tránsito', ['corralon de transito', 'corralón de tránsito', 'corralon']);
+  add('L-48', 'Zona militar', ['zona militar']);
+  add('L-49', 'Base militar', ['base militar']);
+  add('L-50', 'Rochester / Villacrisol', ['rochester', 'villacrisol']);
+
+  // ACCIONES A
+  add('A-3', 'Solicitud de refuerzos', ['solicitud de refuerzos', 'solicita refuerzos', 'refuerzos']);
+  add('A-4', 'Persecución de vehículo', ['persecucion de vehiculo', 'persecución de vehículo', 'persecucion']);
+  add('A-5', 'Darse a la fuga', ['darse a la fuga', 'se dio a la fuga', 'fuga']);
+  add('A-13', 'Temblor / terremoto', ['temblor', 'terremoto', 'sismo']);
+  add('A-14', 'Precaución piso mojado', ['piso mojado']);
+  add('A-16', 'Cómo se escucha', ['como se escucha', 'cómo se escucha']);
+  add('A-17', 'Investigue / indique', ['investigue', 'indique']);
+  add('A-18', 'Acuartelamiento general', ['acuartelamiento general']);
+  add('A-20', 'Zona de patrullajes', ['zona de patrullajes', 'patrullaje']);
+  add('A-21', 'Estacionarse', ['estacionarse', 'estacionado']);
+  add('A-23', 'Franquicia', ['franquicia']);
+  add('A-25', 'Relevo de personal', ['relevo de personal']);
+  add('A-26', 'Operativo confidencial', ['operativo confidencial']);
+  add('A-28', 'Salir de comisión', ['salir de comision', 'salir de comisión']);
+  add('A-29', 'Abandonar el servicio', ['abandonar el servicio']);
+  add('A-30', 'Sin novedad', ['sin novedad', 'sin novedades']);
+  add('A-31', 'Retirarse del lugar', ['retirarse del lugar', 'retirada del lugar']);
+  add('A-32', 'Armar el personal', ['armar el personal']);
+  add('A-33', 'Desarmar el personal', ['desarmar el personal']);
+  add('A-34', 'Acordonar el área', ['acordonar el area', 'acordonar el área']);
+  add('A-35', 'Dirigirse al lugar', ['dirigirse al lugar', 'se dirige al lugar', 'acudir al lugar']);
+
+  // OBJETOS C
+  add('C-1', 'Arma de fuego corta', ['arma de fuego corta', 'arma corta']);
+  add('C-2', 'Arma de fuego larga', ['arma de fuego larga', 'arma larga']);
+  add('C-3', 'Chaleco antibala', ['chaleco antibala']);
+  add('C-4', 'Equipo antimotín', ['equipo antimotin', 'equipo antimotín']);
+  add('C-5', 'Dinero / cheque', ['dinero', 'cheque']);
+  add('C-7', 'Vales de gasolina', ['vales de gasolina']);
+  add('C-8', 'Repuestos de llantas', ['repuestos de llantas', 'llantas']);
+  add('C-9', 'Semáforo', ['semaforo', 'semáforo']);
+
+  // OPERATIVAS O
+  add('O-3', 'Positivo', ['positivo', 'afirmativo']);
+  add('O-4', 'Negativo', ['negativo operativo']);
+  add('O-6', 'Adelante, escucho', ['adelante escucho', 'adelante']);
+  add('O-8', 'Concéntrese a la base', ['concentrarse a la base', 'base']);
+  add('O-9', 'Por orden superior', ['por orden superior']);
+  add('O-10', 'Rápido / urgente', ['rapido', 'rápido', 'urgente']);
+  add('O-11', 'Correctivo disciplinario', ['correctivo disciplinario']);
+  add('O-12', 'Orden de aprehensión', ['orden de aprehension', 'orden de aprehensión']);
+  add('O-13', 'Orden cumplida', ['orden cumplida']);
+  add('O-14', 'Dejar sin efecto la orden', ['dejar sin efecto la orden']);
+  add('O-15', 'Salir de frecuencia', ['salir de frecuencia']);
+
+  // VEHÍCULOS V
+  add('V-2', 'Bicicleta', ['bicicleta', 'bici']);
+  add('V-5', 'Taxi / combi / urbano', ['taxi', 'combi', 'urbano']);
+  add('V-10', 'Vehículo en sentido contrario', ['vehiculo en sentido contrario', 'sentido contrario']);
+  add('V-11', 'Vehículo se pasó el alto', ['se paso el alto', 'se pasó el alto']);
+  add('V-12', 'Vehículo se dio a la fuga', ['vehiculo se dio a la fuga', 'vehículo se dio a la fuga']);
+  add('V-13', 'Vehículo sin placas', ['vehiculo sin placas', 'sin placas']);
+  add('V-14', 'Vehículo oficial', ['vehiculo oficial', 'vehículo oficial']);
+  add('V-15', 'Vehículo militar', ['vehiculo militar', 'vehículo militar']);
+  add('V-16', 'Patrulla / motopatrulla', ['patrulla', 'moto patrulla']);
+
+  // PERSONAL P
+  add('P-1', 'Agente de FMP', ['agente de fmp', 'fmp']);
+  add('P-2', 'Funcionario de gobierno', ['funcionario de gobierno']);
+  add('P-3', 'Comandante de guardia', ['comandante de guardia']);
+  add('P-4', 'Policía / agente de tránsito', ['policia', 'policía', 'agente de transito', 'agente de tránsito']);
+  add('P-5', 'Comandante', ['comandante']);
+  add('P-6', 'Policía femenil', ['policia femenil', 'policía femenil']);
+  add('P-7', 'Perito de tránsito', ['perito de transito', 'perito de tránsito']);
+  add('P-8', 'Secretaria / secretario', ['secretaria', 'secretario']);
+  add('P-9', 'Pagador / cajero', ['pagador', 'cajero']);
+  add('P-10', 'Atropellado', ['atropellado', 'atropellamiento']);
+  add('P-13', 'Enfermo', ['enfermo', 'paciente enfermo', 'golpe de calor', 'deshidratado', 'dolor', 'convulsion', 'convulsión']);
+  add('P-14', 'Enfermero/a', ['enfermero', 'enfermera']);
+  add('P-17', 'Bolitero en acción', ['bolitero en accion', 'bolitero en acción']);
+  add('P-18', 'Sospechoso', ['sospechoso']);
+  add('P-19', 'Vago / malviviente', ['vago', 'malviviente']);
+  add('P-23', 'Persona o policía a bordo', ['persona a bordo', 'policia a bordo', 'policía a bordo']);
+  add('P-24', 'Travesti', ['travesti', 'trasvesti']);
+  add('P-25', 'Prostituta', ['prostituta']);
+  add('P-27', 'Conductor / chofer', ['conductor', 'chofer']);
+  add('P-29', 'Extranjero', ['extranjero']);
+  add('P-30', 'Indocumentado', ['indocumentado']);
+  add('P-31', 'Persona extraviada', ['persona extraviada', 'extraviado', 'extraviada']);
+  add('P-33', 'Novia / esposa', ['novia', 'esposa']);
+  add('P-34', 'Sancho', ['sancho']);
+  add('P-35', 'Militar', ['militar']);
+  add('P-36', 'Bomberos', ['bomberos']);
+  add('P-37', 'Persona civil', ['persona civil', 'civil']);
+
+  // EVENTOS E
+  add('E-1', 'Aseo / limpieza', ['aseo', 'limpieza']);
+  add('E-2', 'Banda de guerra', ['banda de guerra']);
+  add('E-3', 'Ceremonia', ['ceremonia']);
+  add('E-4', 'Boleta de infracción', ['boleta de infraccion', 'boleta de infracción', 'infraccion', 'infracción']);
+  add('E-5', 'Choque contra objeto fijo', ['choque contra objeto fijo']);
+  add('E-6', 'Semáforo apagado', ['semaforo apagado', 'semáforo apagado']);
+  add('E-7', 'Desfile', ['desfile']);
+  add('E-8', 'Dormirse en el servicio', ['dormirse en el servicio']);
+  add('E-9', 'Ingerir bebidas', ['ingerir bebidas', 'tomando bebidas']);
+  add('E-10', 'Sepelio / entierro / velorio', ['sepelio', 'entierro', 'velorio']);
+
+  // SEXO / PERSONAS / VEHÍCULOS POR RADIO
+  add('METRO', 'Masculino', ['masculino', 'hombre', 'varon', 'varón']);
+  add('FOX', 'Femenino', ['femenino', 'mujer', 'femenina']);
+  add('FOX METRO', 'Homosexual', ['homosexual']);
+  add('TANGO', 'Taxi', ['taxi unidad']);
+  add('DELTA', 'Dinero', ['delta dinero']);
+
+  const FONETICO = {
+    a:'ALFA', b:'BRAVO', c:'COCA', d:'DELTA', e:'ECO', f:'FOX', g:'GOLFO', h:'HOTEL', i:'INDIO',
+    j:'JULIETA', k:'KILO', l:'LITRO', m:'METRO', n:'NECTAR', o:'OSO', p:'PAPA', q:'QUEBEC', r:'ROMEO',
+    s:'SIERRA', t:'TANGO', u:'UNIÓN', v:'VICTOR', w:'WHISKY', x:'XOCHITL', y:'YANQUI', z:'ZULÚ',
+    '0':'NADA','1':'PRIMERO','2':'SEGUNDO','3':'TERCERO','4':'CUARTO','5':'QUINTO','6':'SEXTO','7':'SEPTIMO','8':'OCTAVO','9':'NOVENO'
+  };
+
+  function normaliza(txt){
+    return String(txt || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g,'')
+      .replace(/ñ/g,'n')
+      .replace(/\s+/g,' ')
+      .trim();
+  }
+
+  function escapeRegExp(str){
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function getPersonalizadas(){
+    try { return JSON.parse(localStorage.getItem('claves_personalizadas') || '[]'); }
+    catch(e){ return []; }
+  }
+
+  function setPersonalizadas(arr){
+    localStorage.setItem('claves_personalizadas', JSON.stringify(arr));
+  }
+
+  function todasLasClaves(){
+    return [...CATALOGO, ...getPersonalizadas()];
+  }
+
+  function deletrear(cadena){
+    return String(cadena).toLowerCase().split('').map(ch => FONETICO[ch] || ch).join(' ');
+  }
+
+  function traducirPlacas(texto){
+    return texto.replace(/\b(placa|placas|serie|economico|eco|numero|número)\s+([a-z0-9-]{2,12})\b/gi, (m, etiqueta, valor) => {
+      return etiqueta + ' ' + valor.toUpperCase() + ' [' + deletrear(valor.replace(/-/g,'')) + ']';
+    });
+  }
+
+  function traducir(){
+    let original = document.getElementById('entrada').value.trim();
+    if(!original){
+      document.getElementById('salida').textContent = 'Escribe primero una frase para convertir.';
+      return;
+    }
+
+    let texto = normaliza(original);
+    texto = traducirPlacas(texto);
+
+    const claves = todasLasClaves();
+    const reglas = [];
+    claves.forEach((item, idx) => {
+      item.terms.forEach(term => reglas.push({ term, code:item.code, desc:item.desc, idx }));
+    });
+    reglas.sort((a,b) => b.term.length - a.term.length);
+
+    const placeholders = [];
+    reglas.forEach((r) => {
+      if(!r.term || r.term.length < 2) return;
+      const pattern = escapeRegExp(r.term).replace(/\s+/g, '\\s+');
+      const re = new RegExp('(^|[^a-z0-9])(' + pattern + ')(?=$|[^a-z0-9])', 'g');
+      texto = texto.replace(re, (match, pre) => {
+        const ph = '¤' + placeholders.length + '¤';
+        placeholders.push('[' + r.code + ' - ' + r.desc + ']');
+        return pre + ph;
+      });
+    });
+
+    placeholders.forEach((val, i) => {
+      texto = texto.replaceAll('¤' + i + '¤', val);
+    });
+
+    texto = texto
+      .replace(/\s+([,.;:])/g, '$1')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+
+    document.getElementById('salida').textContent = texto;
+  }
+
+  function copiar(){
+    const txt = document.getElementById('salida').textContent;
+    navigator.clipboard.writeText(txt).then(() => toast('Resultado copiado'));
+  }
+
+  function limpiar(){
+    document.getElementById('entrada').value = '';
+    document.getElementById('salida').textContent = 'Aquí aparecerá la conversión...';
+  }
+
+  function ejemplo(i){
+    document.getElementById('entrada').value = ejemplos[i];
+    traducir();
+  }
+
+  function agregarPersonalizada(){
+    const termino = document.getElementById('nuevoTermino').value.trim();
+    const codigo = document.getElementById('nuevoCodigo').value.trim();
+    const desc = document.getElementById('nuevaDesc').value.trim() || termino;
+    if(!termino || !codigo){ toast('Falta término o código'); return; }
+    const arr = getPersonalizadas();
+    arr.push({ code:codigo, desc, terms:[normaliza(termino)] });
+    setPersonalizadas(arr);
+    document.getElementById('nuevoTermino').value = '';
+    document.getElementById('nuevoCodigo').value = '';
+    document.getElementById('nuevaDesc').value = '';
+    pintarCatalogo();
+    toast('Clave guardada');
+  }
+
+  function toast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    setTimeout(() => t.style.display = 'none', 1700);
+  }
+
+  function pintarCatalogo(){
+    const vista = document.getElementById('catalogoVista');
+    vista.innerHTML = '';
+    todasLasClaves().forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'item';
+      div.innerHTML = '<span class="code">' + item.code + '</span>' + item.desc + '<br><small>' + item.terms.join(', ') + '</small>';
+      vista.appendChild(div);
+    });
+  }
+
+  document.getElementById('entrada').addEventListener('input', traducir);
+  pintarCatalogo();
+</script>
+</body>
+</html>
